@@ -1,114 +1,450 @@
-<!doctype html>
-<html lang="en" class="">
+<!DOCTYPE html>
+<html lang="en">
 
 <head>
-  <meta charset="UTF-8" />
-  <link rel="icon" type="image/svg+xml" href="/vite.svg" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Crudex - Premium Task Manager</title>
-  <link href="./src/style.css" rel="stylesheet">
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-  <script>
-    (function () {
-      const savedTheme = localStorage.getItem('theme');
-      const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
-      if (savedTheme === 'dark' || (!savedTheme && prefersDark)) {
-        document.documentElement.classList.add('dark');
-      } else {
-        document.documentElement.classList.remove('dark');
-      }
-    })();
-  </script>
+  <!-- Fonts -->
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/src/style.css">
 </head>
 
-<body class="bg-gray-50 dark:bg-gray-900 h-screen overflow-hidden flex flex-col transition-colors duration-300">
+<body
+  class="bg-slate-900 text-slate-100 font-sans antialiased h-screen flex flex-col md:flex-row overflow-hidden selection:bg-blue-500 selection:text-white">
 
   <!-- Auth Container -->
-  <div id="auth-container" class="flex-grow flex items-center justify-center p-4">
-    <div class="auth-card">
-      <div class="text-center mb-8">
-        <h1 class="text-4xl font-extrabold text-brand-500 dark:text-white mb-2 drop-shadow-sm">Welcome to Crudex</h1>
-        <p class="text-slate-500 dark:text-gray-400 font-medium text-lg">Organize your Notes & tasks!</p>
+  <div id="auth-container"
+    class="fixed inset-0 z-50 flex items-center justify-center bg-slate-900 bg-[radial-gradient(ellipse_at_top,_var(--tw-gradient-stops))] from-slate-800 via-slate-900 to-black p-4 hidden">
+    <div
+      class="auth-card w-full max-w-md bg-slate-800/50 backdrop-blur-xl border border-slate-700/50 rounded-3xl p-8 shadow-2xl flex flex-col items-center relative overflow-hidden group">
+      <!-- Glow effect -->
+      <div
+        class="absolute -top-20 -left-20 w-40 h-40 bg-blue-500/20 rounded-full blur-3xl group-hover:bg-blue-500/30 transition-all duration-700">
       </div>
 
-      <form id="auth-form" class="space-y-4">
-        <div>
-          <label for="email" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Email</label>
-          <input type="email" id="email" class="input-field" placeholder="you@example.com" required>
+      <div class="mb-8 relative z-10 flex flex-col items-center">
+        <div
+          class="w-16 h-16 rounded-2xl bg-gradient-to-br from-blue-500 to-cyan-400 flex items-center justify-center shadow-lg shadow-blue-500/30 mb-4 transform group-hover:scale-105 transition-transform duration-500">
+          <span class="text-3xl font-bold text-white">C</span>
         </div>
-        <div>
-          <label for="password" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Password</label>
-          <input type="password" id="password" class="input-field" placeholder="••••••••" required>
+        <h1 class="text-3xl font-bold text-white tracking-tight">Welcome to Crudex</h1>
+        <p class="text-slate-400 mt-2">Manage your tasks with style</p>
+      </div>
+
+      <form id="auth-form" class="w-full space-y-5 relative z-10">
+        <div class="space-y-1">
+          <label class="text-sm font-medium text-slate-400 ml-1">Email</label>
+          <input type="email" id="email"
+            class="w-full px-5 py-3 rounded-xl bg-slate-900/50 border border-slate-700 text-white placeholder-slate-600 focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 transition-all font-medium"
+            placeholder="name@example.com" required>
         </div>
-        <button type="submit" id="auth-submit-btn" class="btn-primary">
-          Sign In / Sign Up
+        <div class="space-y-1">
+          <label class="text-sm font-medium text-slate-400 ml-1">Password</label>
+          <input type="password" id="password"
+            class="w-full px-5 py-3 rounded-xl bg-slate-900/50 border border-slate-700 text-white placeholder-slate-600 focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 transition-all font-medium"
+            placeholder="••••••••" required>
+        </div>
+        <button type="submit"
+          class="w-full py-3.5 rounded-xl bg-gradient-to-r from-blue-600 to-cyan-500 hover:from-blue-500 hover:to-cyan-400 text-white font-bold shadow-lg shadow-blue-600/20 transform hover:-translate-y-0.5 transition-all duration-300">
+          Sign In
         </button>
       </form>
-      <p id="auth-message" class="mt-4 text-center text-sm text-red-500 hidden"></p>
-      <p class="mt-4 text-center text-xs text-gray-400 dark:text-gray-500">
-        Entering a new email will automatically create an account.
-      </p>
+      <p id="auth-message" class="mt-6 text-sm text-slate-400 hidden"></p>
     </div>
   </div>
 
-  <!-- App Container (Hidden by default) -->
-  <div id="app-container" class="hidden h-full flex flex-col">
-    <!-- Header -->
-    <header
-      class="bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700 px-6 py-4 flex items-center justify-between shadow-sm z-10 transition-colors duration-300">
-      <div class="flex items-center space-x-3">
+  <!-- App Container -->
+  <div id="app-container" class="hidden w-full h-full flex flex-col md:flex-row relative">
+
+    <!-- Sidebar -->
+    <aside
+      class="w-72 bg-slate-900/95 backdrop-blur-xl border-r border-slate-800/50 flex flex-col z-30 transform -translate-x-full md:translate-x-0 absolute md:relative h-full transition-transform duration-300"
+      id="sidebar">
+      <!-- Sidebar Header -->
+      <div class="p-8 pb-4 flex items-center space-x-3">
         <div
-          class="w-10 h-10 rounded-full bg-doraemon-yellow border-2 border-doraemon-red flex items-center justify-center text-doraemon-red shadow-lg transform hover:rotate-12 transition-transform">
-          <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" viewBox="0 0 20 20" fill="currentColor">
-            <path
-              d="M10 2a6 6 0 00-6 6v3.586l-.707.707A1 1 0 004 14h12a1 1 0 00.707-1.707L16 11.586V8a6 6 0 00-6-6zM10 18a3 3 0 01-3-3h6a3 3 0 01-3 3z" />
-          </svg>
+          class="w-10 h-10 rounded-xl bg-gradient-to-tr from-blue-600 to-cyan-500 flex items-center justify-center shadow-lg shadow-blue-500/20">
+          <span class="text-white font-bold text-xl">C</span>
         </div>
-        <h1 class="text-xl font-bold text-gray-800 dark:text-white">Crudex</h1>
+        <h1 class="text-2xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-white to-slate-400">Crudex
+        </h1>
       </div>
-      <div class="flex items-center space-x-4">
-        <!-- Theme Toggle Button -->
-        <button id="theme-toggle" class="theme-toggle" title="Toggle theme">
-          <!-- Sun icon (shown in dark mode) -->
-          <svg id="sun-icon" class="h-5 w-5 hidden" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
+
+      <!-- Navigation -->
+      <nav class="flex-grow px-4 space-y-2 mt-6">
+        <div class="px-4 py-2 text-xs font-semibold text-slate-500 uppercase tracking-wider">Menu</div>
+
+        <button id="nav-dashboard"
+          class="nav-item w-full flex items-center space-x-3 px-4 py-3 rounded-xl text-slate-400 hover:bg-slate-800/50 hover:text-white transition-all group relative overflow-hidden">
+          <div
+            class="absolute inset-0 bg-gradient-to-r from-blue-500/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity">
+          </div>
+          <svg class="w-5 h-5 group-hover:text-cyan-400 transition-colors relative z-10" fill="none" viewBox="0 0 24 24"
             stroke="currentColor">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-              d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z" />
+              d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z" />
           </svg>
-          <!-- Moon icon (shown in light mode) -->
-          <svg id="moon-icon" class="h-5 w-5" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
+          <span class="font-medium relative z-10">Dashboard</span>
+        </button>
+
+        <button id="nav-tasks"
+          class="nav-item w-full flex items-center space-x-3 px-4 py-3 rounded-xl text-slate-400 hover:bg-slate-800/50 hover:text-white transition-all group relative overflow-hidden">
+          <div
+            class="absolute inset-0 bg-gradient-to-r from-blue-500/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity">
+          </div>
+          <svg class="w-5 h-5 relative z-10" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+              d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+          </svg>
+          <span class="font-medium relative z-10">My Tasks</span>
+        </button>
+
+        <button id="nav-notes"
+          class="nav-item w-full flex items-center space-x-3 px-4 py-3 rounded-xl text-slate-400 hover:bg-slate-800/50 hover:text-white transition-all group relative overflow-hidden">
+          <div
+            class="absolute inset-0 bg-gradient-to-r from-purple-500/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity">
+          </div>
+          <svg class="w-5 h-5 group-hover:text-purple-400 transition-colors relative z-10" fill="none"
+            viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+              d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+          </svg>
+          <span class="font-medium relative z-10">Notes</span>
+        </button>
+
+        <button id="nav-projects"
+          class="nav-item w-full flex items-center space-x-3 px-4 py-3 rounded-xl text-slate-400 hover:bg-slate-800/50 hover:text-white transition-all group relative overflow-hidden">
+          <div
+            class="absolute inset-0 bg-gradient-to-r from-indigo-500/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity">
+          </div>
+          <svg class="w-5 h-5 group-hover:text-indigo-400 transition-colors relative z-10" fill="none"
+            viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+              d="M3 7v10a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-6l-2-2H5a2 2 0 00-2 2z" />
+          </svg>
+          <span class="font-medium relative z-10">Projects</span>
+        </button>
+
+        <button id="nav-teams"
+          class="nav-item w-full flex items-center space-x-3 px-4 py-3 rounded-xl text-slate-400 hover:bg-slate-800/50 hover:text-white transition-all group relative overflow-hidden">
+          <div
+            class="absolute inset-0 bg-gradient-to-r from-pink-500/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity">
+          </div>
+          <svg class="w-5 h-5 group-hover:text-pink-400 transition-colors relative z-10" fill="none" viewBox="0 0 24 24"
             stroke="currentColor">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-              d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z" />
+              d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
           </svg>
+          <span class="font-medium relative z-10">Teams</span>
         </button>
-        <span id="user-email" class="text-sm text-gray-600 dark:text-gray-400 hidden md:block"></span>
-        <button id="logout-btn"
-          class="text-sm text-gray-500 dark:text-gray-400 hover:text-red-600 dark:hover:text-red-400 transition font-medium">
-          Sign Out
-        </button>
-      </div>
-    </header>
+
+        <div class="pt-4 px-4">
+          <div class="h-px bg-slate-800 w-full mb-4"></div>
+          <button id="nav-settings"
+            class="nav-item w-full flex items-center space-x-3 px-4 py-3 rounded-xl text-slate-400 hover:bg-slate-800/50 hover:text-white transition-all group relative overflow-hidden">
+            <svg class="w-5 h-5 group-hover:text-gray-200 transition-colors relative z-10" fill="none"
+              viewBox="0 0 24 24" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" />
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+            </svg>
+            <span class="font-medium relative z-10">Settings</span>
+          </button>
+        </div>
+      </nav>
+    </aside>
 
     <!-- Main Content -->
-    <main class="flex-grow p-6 overflow-hidden flex justify-center">
-      <div class="w-full max-w-4xl h-full flex flex-col">
+    <main class="flex-grow flex flex-col h-full relative overflow-hidden bg-slate-900">
+      <!-- Ambient Backgrounds -->
+      <div class="absolute inset-0 w-full h-full overflow-hidden pointer-events-none z-0">
+        <div
+          class="absolute top-[-10%] left-[20%] w-[500px] h-[500px] bg-blue-600/10 rounded-full blur-[100px] animate-pulse-slow">
+        </div>
+        <div class="absolute bottom-[-10%] right-[10%] w-[600px] h-[600px] bg-purple-600/5 rounded-full blur-[120px]">
+        </div>
+      </div>
 
-        <!-- Tabs -->
-        <div class="flex space-x-1 bg-gray-100 p-1 rounded-xl mb-6 dark:bg-gray-700 w-fit self-center shadow-inner">
-          <button id="tab-tasks" class="nav-tab nav-tab-active">Tasks</button>
-          <button id="tab-notes" class="nav-tab">Notes</button>
+      <!-- Header -->
+      <header class="flex items-center justify-between px-8 py-6 z-50 glass-header relative">
+        <button id="mobile-menu-btn" class="md:hidden text-slate-400 hover:text-white mr-4">
+          <svg class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16" />
+          </svg>
+        </button>
+
+        <!-- Search -->
+        <div class="relative w-full max-w-lg hidden md:block group">
+          <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+            <svg class="h-5 w-5 text-slate-500 group-focus-within:text-blue-400 transition-colors"
+              xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
+              <path fill-rule="evenodd"
+                d="M8 4a4 4 0 100 8 4 4 0 000-8zM2 8a6 6 0 1110.89 3.476l4.817 4.817a1 1 0 01-1.414 1.414l-4.816-4.816A6 6 0 012 8z"
+                clip-rule="evenodd" />
+            </svg>
+          </div>
+          <input type="text"
+            class="block w-full pl-10 pr-3 py-2.5 border border-slate-700/50 rounded-xl leading-5 bg-slate-800/50 text-slate-300 placeholder-slate-500 focus:outline-none focus:bg-slate-800 focus:border-blue-500/50 focus:ring-1 focus:ring-blue-500/50 sm:text-sm transition-all shadow-sm"
+            placeholder="Search tasks or notes...">
+        </div>
+
+        <!-- Profile & Actions -->
+        <div class="flex items-center space-x-6 ml-auto">
+          <!-- Notification -->
+          <!-- Notification -->
+          <div class="relative" id="notification-container">
+            <button id="notification-btn"
+              class="relative text-slate-400 hover:text-white transition-colors p-2 rounded-full hover:bg-slate-800">
+              <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24"
+                stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                  d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9" />
+              </svg>
+              <span
+                class="absolute top-2 right-2 block h-2 w-2 rounded-full bg-red-500 ring-2 ring-slate-900 animate-pulse"></span>
+            </button>
+
+            <!-- Dropdown -->
+            <div id="notification-dropdown"
+              class="absolute right-0 mt-2 w-80 glass-panel rounded-xl shadow-2xl origin-top-right transform scale-95 opacity-0 pointer-events-none transition-all duration-200 z-50 overflow-hidden border border-slate-700/50">
+              <div
+                class="p-4 border-b border-white/5 flex justify-between items-center bg-slate-800/80 backdrop-blur-md">
+                <h3 class="font-bold text-white text-sm">Notifications</h3>
+                <button class="text-xs text-blue-400 hover:text-blue-300 transition-colors">Mark all read</button>
+              </div>
+              <div class="max-h-80 overflow-y-auto custom-scrollbar bg-slate-900/90 backdrop-blur-md">
+                <div class="p-4 border-b border-white/5 hover:bg-white/5 transition-colors cursor-pointer group">
+                  <div class="flex items-start space-x-3">
+                    <div
+                      class="p-2 rounded-full bg-blue-500/10 text-blue-400 group-hover:bg-blue-500/20 transition-colors mt-0.5">
+                      <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" fill="none" viewBox="0 0 24 24"
+                        stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                          d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01" />
+                      </svg>
+                    </div>
+                    <div>
+                      <p class="text-sm text-slate-300 leading-tight">New task assigned: <span
+                          class="text-white font-medium">Update Documentation</span></p>
+                      <p class="text-xs text-slate-500 mt-1.5">Just now</p>
+                    </div>
+                  </div>
+                </div>
+                <div class="p-4 border-b border-white/5 hover:bg-white/5 transition-colors cursor-pointer group">
+                  <div class="flex items-start space-x-3">
+                    <div
+                      class="p-2 rounded-full bg-purple-500/10 text-purple-400 group-hover:bg-purple-500/20 transition-colors mt-0.5">
+                      <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" fill="none" viewBox="0 0 24 24"
+                        stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                          d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+                      </svg>
+                    </div>
+                    <div>
+                      <p class="text-sm text-slate-300 leading-tight">Note shared: <span
+                          class="text-white font-medium">Project Ideas</span></p>
+                      <p class="text-xs text-slate-500 mt-1.5">2 hours ago</p>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Profile -->
+          <div class="flex items-center space-x-3 pl-4 border-l border-slate-700/50">
+            <div
+              class="h-9 w-9 rounded-full bg-gradient-to-br from-indigo-500 to-purple-500 ring-2 ring-slate-800 flex items-center justify-center text-xs font-bold text-white shadow-lg relative overflow-hidden">
+              <!-- <img src="" alt="Profile" class="object-cover w-full h-full opacity-0"> -->
+              <span class="relative z-10">JS</span>
+            </div>
+            <div class="hidden md:block">
+              <div id="user-display-name" class="text-sm font-semibold text-white leading-tight">User</div>
+              <button id="logout-btn"
+                class="text-xs text-slate-500 hover:text-red-400 transition-colors text-left block">Sign Out</button>
+            </div>
+          </div>
+        </div>
+      </header>
+
+      <!-- Dynamic Content Area -->
+      <div class="flex-grow px-8 pb-8 overflow-hidden flex flex-col z-10 mt-2">
+
+        <!-- Dashboard View -->
+        <div id="dashboard-view" class="h-full flex flex-col gap-6 overflow-y-auto custom-scrollbar pb-20">
+          <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+
+            <!-- Quick Notes Card (Purple Glow) -->
+            <div
+              class="glass-card p-6 rounded-3xl border border-purple-500/30 shadow-[0_0_15px_rgba(168,85,247,0.15)] relative overflow-hidden group flex flex-col h-full">
+              <div class="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-purple-500 to-pink-500"></div>
+              <div class="flex justify-between items-start mb-4">
+                <h3 class="text-xl font-bold text-white">Quick Notes</h3>
+                <button class="text-slate-400 hover:text-white transition-colors">
+                  <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+                    <path
+                      d="M6 10a2 2 0 11-4 0 2 2 0 014 0zM12 10a2 2 0 11-4 0 2 2 0 014 0zM16 12a2 2 0 100-4 2 2 0 000 4z" />
+                  </svg>
+                </button>
+              </div>
+
+              <div id="dashboard-notes-list" class="space-y-3 mb-4 flex-grow overflow-y-auto custom-scrollbar"
+                style="max-height: 200px;">
+                <!-- Notes injected here -->
+                <div class="animate-pulse flex flex-col space-y-2">
+                  <div class="h-4 bg-slate-700/50 rounded w-3/4"></div>
+                  <div class="h-4 bg-slate-700/50 rounded w-1/2"></div>
+                </div>
+              </div>
+
+              <button id="dashboard-add-note-btn"
+                class="w-full py-3 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 hover:text-white font-medium transition-all border border-slate-700 mt-auto">
+                New Note
+              </button>
+            </div>
+
+            <!-- Productivity Stats (Blue Glow) -->
+            <div
+              class="glass-card p-6 rounded-3xl border border-blue-500/30 shadow-[0_0_15px_rgba(59,130,246,0.15)] relative overflow-hidden flex flex-col h-full">
+              <div class="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-blue-500 to-cyan-500"></div>
+              <h3 class="text-xl font-bold text-white mb-4">Productivity Stats</h3>
+
+              <div class="flex-grow flex items-center justify-around">
+                <!-- Circular Progress -->
+                <div class="relative w-32 h-32 flex items-center justify-center">
+                  <svg class="transform -rotate-90 w-32 h-32">
+                    <circle cx="64" cy="64" r="56" stroke="currentColor" stroke-width="12" fill="transparent"
+                      class="text-slate-800" />
+                    <circle id="stats-progress-circle" cx="64" cy="64" r="56" stroke="currentColor" stroke-width="12"
+                      fill="transparent" stroke-dasharray="351.86" stroke-dashoffset="351.86"
+                      class="text-blue-500 transition-all duration-1000 ease-out" />
+                  </svg>
+                  <div class="absolute flex flex-col items-center">
+                    <span id="stats-percentage" class="text-2xl font-bold text-white">0%</span>
+                    <span class="text-xs text-slate-400">Today</span>
+                  </div>
+                </div>
+
+                <div class="flex flex-col items-center">
+                  <span id="stats-completed-count" class="text-4xl font-bold text-white mb-1">0</span>
+                  <span class="text-sm text-slate-400">Completed Tasks</span>
+                </div>
+              </div>
+            </div>
+
+            <!-- Quick Actions -->
+            <div
+              class="glass-card p-6 rounded-3xl border border-slate-700 shadow-lg relative overflow-hidden flex flex-col h-full">
+              <h3 class="text-xl font-bold text-white mb-4">Quick Actions</h3>
+
+              <div class="flex-grow flex flex-col justify-center w-full">
+                <div class="grid grid-cols-2 gap-4 w-full">
+                  <button
+                    class="flex items-center justify-center space-x-2 py-4 rounded-xl bg-slate-800/50 hover:bg-slate-800 border border-slate-700 hover:border-slate-600 transition-all text-slate-300 hover:text-white group">
+                    <svg class="w-5 h-5 group-hover:text-blue-400 transition-colors" fill="none" viewBox="0 0 24 24"
+                      stroke="currentColor">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                        d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                    </svg>
+                    <span>Calendar</span>
+                  </button>
+
+                  <button
+                    class="flex items-center justify-center space-x-2 py-4 rounded-xl bg-slate-800/50 hover:bg-slate-800 border border-slate-700 hover:border-slate-600 transition-all text-slate-300 hover:text-white group">
+                    <svg class="w-5 h-5 group-hover:text-purple-400 transition-colors" fill="none" viewBox="0 0 24 24"
+                      stroke="currentColor">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                        d="M5 8h14M5 8a2 2 0 110-4h14a2 2 0 110 4M5 8v10a2 2 0 002 2h10a2 2 0 002-2V8m-9 4h4" />
+                    </svg>
+                    <span>Archive</span>
+                  </button>
+
+                  <button
+                    class="col-span-2 flex items-center justify-center space-x-2 py-4 rounded-xl bg-slate-800/50 hover:bg-slate-800 border border-slate-700 hover:border-slate-600 transition-all text-slate-300 hover:text-white group">
+                    <svg class="w-5 h-5 group-hover:text-cyan-400 transition-colors" fill="none" viewBox="0 0 24 24"
+                      stroke="currentColor">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                        d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" />
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                        d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                    </svg>
+                    <span>Settings</span>
+                  </button>
+                </div>
+              </div>
+            </div>
+
+          </div>
+
+          <!-- Analysis Grid -->
+          <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+
+            <!-- Weekly Analysis Graph -->
+            <div
+              class="glass-card p-6 rounded-3xl border border-slate-700/50 lg:col-span-2 relative overflow-hidden flex flex-col h-[320px]">
+              <div class="flex justify-between items-center mb-4">
+                <h3 class="font-bold text-white text-lg">Weekly Analysis</h3>
+                <div class="flex space-x-2">
+                  <span class="w-3 h-3 rounded-full bg-blue-500"></span><span
+                    class="text-xs text-slate-400">Completed</span>
+                  <span class="w-3 h-3 rounded-full bg-purple-500"></span><span
+                    class="text-xs text-slate-400">Created</span>
+                </div>
+              </div>
+              <div class="relative w-full flex-grow">
+                <canvas id="analysis-chart"></canvas>
+              </div>
+            </div>
+
+            <!-- Calendar Widget -->
+            <div
+              class="glass-card p-6 rounded-3xl border border-slate-700/50 flex flex-col h-[320px] relative overflow-hidden">
+              <div class="flex justify-between items-center mb-4">
+                <h3 id="calendar-month" class="font-bold text-white text-lg">January 2026</h3>
+                <div class="flex space-x-2">
+                  <button id="prev-month" class="text-slate-400 hover:text-white transition p-1">
+                    <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" />
+                    </svg>
+                  </button>
+                  <button id="next-month" class="text-slate-400 hover:text-white transition p-1">
+                    <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
+                    </svg>
+                  </button>
+                </div>
+              </div>
+
+              <!-- Days Header -->
+              <div class="grid grid-cols-7 mb-2 text-center text-xs text-slate-500 font-medium">
+                <div>Su</div>
+                <div>Mo</div>
+                <div>Tu</div>
+                <div>We</div>
+                <div>Th</div>
+                <div>Fr</div>
+                <div>Sa</div>
+              </div>
+
+              <!-- Days Grid -->
+              <div id="calendar-grid" class="grid grid-cols-7 gap-1 text-center text-sm flex-grow">
+                <!-- Injected via JS -->
+              </div>
+            </div>
+          </div>
         </div>
 
         <!-- Tasks View -->
-        <div id="tasks-view" class="flex-col flex-grow overflow-hidden flex">
-
-          <!-- Actions Bar -->
-          <div class="flex justify-between items-center mb-6">
-            <h2 class="text-2xl font-bold text-gray-800 dark:text-white">My Tasks</h2>
-            <button id="add-todo-btn" class="btn-primary w-auto flex items-center space-x-2">
+        <div id="tasks-view" class="h-full flex flex-col hidden">
+          <div class="flex justify-between items-center mb-8">
+            <div>
+              <h2 class="text-3xl font-bold text-white tracking-tight">My Tasks</h2>
+              <p class="text-slate-400 text-sm mt-1">Manage your daily goals</p>
+            </div>
+            <button id="add-todo-btn"
+              class="bg-gradient-to-r from-blue-600 to-cyan-600 hover:from-blue-500 hover:to-cyan-500 text-white px-6 py-2.5 rounded-xl font-medium shadow-lg shadow-blue-600/20 hover:shadow-blue-600/40 transition-all transform hover:-translate-y-0.5 flex items-center space-x-2 border border-white/10">
               <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
                 <path fill-rule="evenodd"
                   d="M10 3a1 1 0 011 1v5h5a1 1 0 110 2h-5v5a1 1 0 11-2 0v-5H4a1 1 0 110-2h5V4a1 1 0 011-1z"
@@ -118,36 +454,38 @@
             </button>
           </div>
 
-          <!-- Loading State -->
-          <div id="loading-state" class="flex justify-center items-center h-64 hidden">
-            <div class="animate-spin rounded-full h-12 w-12 border-b-2 border-brand-600"></div>
-          </div>
-
-          <!-- Todo List -->
-          <div id="todo-list" class="flex-grow overflow-y-auto space-y-3 pb-20 pr-2 custom-scrollbar">
-            <!-- Items will be injected here -->
+          <!-- Loading -->
+          <div id="loading-state" class="hidden flex justify-center py-20">
+            <div class="animate-spin rounded-full h-10 w-10 border-t-2 border-b-2 border-blue-500"></div>
           </div>
 
           <!-- Empty State -->
           <div id="empty-state"
-            class="hidden flex flex-col items-center justify-center h-64 text-gray-400 dark:text-gray-500">
-            <svg xmlns="http://www.w3.org/2000/svg" class="h-16 w-16 mb-4 text-gray-300" fill="none" viewBox="0 0 24 24"
-              stroke="currentColor">
+            class="hidden flex flex-col items-center justify-center h-64 text-slate-500 border-2 border-dashed border-slate-800 rounded-2xl bg-slate-800/20">
+            <svg class="w-12 h-12 mb-4 text-slate-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01" />
+                d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
             </svg>
-            <p class="text-lg font-medium">No tasks found</p>
-            <p class="text-sm">Create a new task to get started.</p>
+            <p class="font-medium">No tasks yet</p>
+            <p class="text-sm">Create one to get started!</p>
           </div>
 
-        </div> <!-- End Tasks View -->
+          <!-- Grid -->
+          <div id="todo-list"
+            class="flex-grow overflow-y-auto pr-2 custom-scrollbar grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 auto-rows-max content-start pb-20">
+            <!-- Cards injected here -->
+          </div>
+        </div>
 
-        <!-- Notes View -->
-        <div id="notes-view" class="hidden flex-col flex-grow overflow-hidden flex">
-          <!-- Actions Bar -->
-          <div class="flex justify-between items-center mb-6">
-            <h2 class="text-2xl font-bold text-gray-800 dark:text-white">My Notes</h2>
-            <button id="add-note-btn" class="btn-primary w-auto flex items-center space-x-2">
+        <!-- Notes View (Hidden) -->
+        <div id="notes-view" class="hidden h-full flex flex-col">
+          <div class="flex justify-between items-center mb-8">
+            <div>
+              <h2 class="text-3xl font-bold text-white tracking-tight">Notes</h2>
+              <p class="text-slate-400 text-sm mt-1">Capture your ideas</p>
+            </div>
+            <button id="add-note-btn"
+              class="bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-500 hover:to-pink-500 text-white px-6 py-2.5 rounded-xl font-medium shadow-lg shadow-purple-600/20 hover:shadow-purple-600/40 transition-all transform hover:-translate-y-0.5 flex items-center space-x-2 border border-white/10">
               <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
                 <path fill-rule="evenodd"
                   d="M10 3a1 1 0 011 1v5h5a1 1 0 110 2h-5v5a1 1 0 11-2 0v-5H4a1 1 0 110-2h5V4a1 1 0 011-1z"
@@ -157,57 +495,107 @@
             </button>
           </div>
 
-          <!-- Notes List -->
           <div id="notes-list"
-            class="flex-grow overflow-y-auto pb-20 pr-2 custom-scrollbar grid grid-cols-1 md:grid-cols-2 gap-4 auto-rows-min content-start">
-            <!-- Notes will be injected here -->
+            class="flex-grow overflow-y-auto pr-2 custom-scrollbar grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 auto-rows-max content-start pb-20">
+            <!-- Notes injected here -->
           </div>
 
-          <!-- Notes Empty State -->
           <div id="notes-empty-state"
-            class="hidden flex flex-col items-center justify-center h-64 text-gray-400 dark:text-gray-500">
-            <svg xmlns="http://www.w3.org/2000/svg" class="h-16 w-16 mb-4 text-gray-300" fill="none" viewBox="0 0 24 24"
-              stroke="currentColor">
+            class="hidden flex flex-col items-center justify-center h-64 text-slate-500 border-2 border-dashed border-slate-800 rounded-2xl bg-slate-800/20">
+            <svg class="w-12 h-12 mb-4 text-slate-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                 d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
             </svg>
-            <p class="text-lg font-medium">No notes yet</p>
-            <p class="text-sm">Capture your thoughts!</p>
+            <p class="font-medium">No notes yet.</p>
           </div>
+        </div>
+
+        <!-- Projects View (Placeholder) -->
+        <div id="projects-view" class="hidden h-full flex flex-col items-center justify-center text-center">
+          <div class="bg-blue-500/10 p-6 rounded-full mb-4 animate-pulse">
+            <svg class="w-16 h-16 text-blue-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                d="M3 7v10a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-6l-2-2H5a2 2 0 00-2 2z" />
+            </svg>
+          </div>
+          <h2 class="text-3xl font-bold text-white mb-2">Projects</h2>
+          <p class="text-slate-400 max-w-md">Manage your ongoing projects and track progress efficiently. This feature
+            is coming soon!</p>
+        </div>
+
+        <!-- Teams View (Placeholder) -->
+        <div id="teams-view" class="hidden h-full flex flex-col items-center justify-center text-center">
+          <div class="bg-pink-500/10 p-6 rounded-full mb-4 animate-pulse">
+            <svg class="w-16 h-16 text-pink-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
+            </svg>
+          </div>
+          <h2 class="text-3xl font-bold text-white mb-2">Team Collaboration</h2>
+          <p class="text-slate-400 max-w-md">Collaborate with your team members in real-time. Invite members to get
+            started.</p>
         </div>
 
       </div>
     </main>
   </div>
 
-  <!-- Modal Form (Hidden by default) -->
+  <!-- Task Modal -->
   <div id="todo-modal"
-    class="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 hidden flex items-center justify-center opacity-0 transition-opacity duration-300">
+    class="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 hidden flex items-center justify-center opacity-0 transition-opacity duration-300">
     <div
-      class="bg-white dark:bg-gray-800 rounded-xl shadow-2xl w-full max-w-lg p-6 transform scale-95 transition-transform duration-300 transition-all">
-      <div class="flex justify-between items-center mb-6">
-        <h3 id="modal-title" class="text-xl font-bold text-gray-900 dark:text-white">Add New Task</h3>
-        <button id="close-modal-btn" class="text-gray-400 hover:text-gray-600 dark:hover:text-gray-200 transition">
+      class="glass-panel w-full max-w-lg p-8 transform scale-95 transition-transform duration-300 transition-all flex flex-col relative overflow-hidden">
+      <!-- Modal Glow -->
+      <div class="absolute top-0 right-0 w-32 h-32 bg-blue-500/10 rounded-full blur-2xl"></div>
+
+      <div class="flex justify-between items-center mb-6 relative z-10">
+        <h3 id="modal-title" class="text-2xl font-bold text-white">New Task</h3>
+        <button id="close-modal-btn"
+          class="text-slate-400 hover:text-white transition p-1 hover:bg-slate-800 rounded-lg">
           <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
           </svg>
         </button>
       </div>
 
-      <form id="todo-form">
+      <form id="todo-form" class="flex flex-col flex-grow relative z-10">
         <input type="hidden" id="todo-id">
-        <div class="mb-6">
-          <label for="todo-title" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Title</label>
-          <input type="text" id="todo-title" class="input-field" placeholder="What needs to be done?" required
-            autofocus>
+
+        <div class="space-y-4">
+          <div>
+            <label class="block text-sm font-medium text-slate-400 mb-1">Title</label>
+            <input type="text" id="todo-title"
+              class="w-full px-4 py-3 rounded-xl bg-slate-900/50 border border-slate-700 text-white placeholder-slate-600 focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 transition-all font-medium text-lg"
+              placeholder="What needs to be done?" required>
+          </div>
+
+          <div class="grid grid-cols-2 gap-4">
+            <div>
+              <label class="block text-sm font-medium text-slate-400 mb-1">Category</label>
+              <select id="todo-category"
+                class="w-full px-4 py-3 rounded-xl bg-slate-900/50 border border-slate-700 text-white focus:outline-none focus:border-blue-500 transition-all appearance-none">
+                <option value="General">General</option>
+                <option value="DevOps">DevOps</option>
+                <option value="Design">Design</option>
+                <option value="Frontend">Frontend</option>
+                <option value="Backend">Backend</option>
+              </select>
+            </div>
+            <div>
+              <label class="block text-sm font-medium text-slate-400 mb-1">Due Date</label>
+              <input type="date" id="todo-due-date"
+                class="w-full px-4 py-3 rounded-xl bg-slate-900/50 border border-slate-700 text-white placeholder-slate-600 focus:outline-none focus:border-blue-500 transition-all appearance-none relative">
+            </div>
+          </div>
         </div>
 
-        <div class="flex items-center justify-end space-x-3">
+        <div class="flex items-center justify-end space-x-3 pt-8 mt-2">
           <button type="button" id="cancel-modal-btn"
-            class="px-4 py-2 rounded-lg text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 font-medium transition">
+            class="px-5 py-2.5 rounded-xl text-slate-300 hover:bg-slate-800 font-medium transition">
             Cancel
           </button>
-          <button type="submit" class="btn-primary w-auto px-6">
+          <button type="submit"
+            class="bg-gradient-to-r from-blue-600 to-cyan-600 hover:from-blue-500 hover:to-cyan-500 text-white px-8 py-2.5 rounded-xl font-bold shadow-lg shadow-blue-600/20 hover:shadow-blue-600/40 transition-all">
             Save Task
           </button>
         </div>
@@ -215,39 +603,44 @@
     </div>
   </div>
 
-  <!-- Note Modal -->
+  <!-- Note Modal (Re-implementation to match style) -->
   <div id="note-modal"
-    class="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 hidden flex items-center justify-center opacity-0 transition-opacity duration-300">
+    class="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 hidden flex items-center justify-center opacity-0 transition-opacity duration-300">
     <div
-      class="bg-white dark:bg-gray-800 rounded-xl shadow-2xl w-full max-w-2xl p-6 transform scale-95 transition-transform duration-300 transition-all flex flex-col h-3/4">
-      <div class="flex justify-between items-center mb-6">
-        <h3 id="note-modal-title" class="text-xl font-bold text-gray-900 dark:text-white">Add New Note</h3>
-        <button id="close-note-modal-btn" class="text-gray-400 hover:text-gray-600 dark:hover:text-gray-200 transition">
+      class="glass-panel w-full max-w-2xl p-8 transform scale-95 transition-transform duration-300 transition-all flex flex-col h-[80vh] relative overflow-hidden">
+      <!-- Modal Glow -->
+      <div class="absolute bottom-0 left-0 w-40 h-40 bg-purple-500/10 rounded-full blur-2xl"></div>
+
+      <div class="flex justify-between items-center mb-6 relative z-10">
+        <h3 id="note-modal-title" class="text-2xl font-bold text-white">Add New Note</h3>
+        <button id="close-note-modal-btn"
+          class="text-slate-400 hover:text-white transition p-1 hover:bg-slate-800 rounded-lg">
           <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
           </svg>
         </button>
       </div>
 
-      <form id="note-form" class="flex flex-col flex-grow overflow-hidden">
+      <form id="note-form" class="flex flex-col flex-grow overflow-hidden relative z-10">
         <input type="hidden" id="note-id">
         <div class="mb-4">
           <input type="text" id="note-title"
-            class="w-full text-xl font-bold border-b border-gray-200 dark:border-gray-700 px-2 py-2 focus:outline-none focus:border-brand-500 bg-transparent text-gray-800 dark:text-white placeholder-gray-400 dark:placeholder-gray-600 transition-colors"
+            class="w-full text-2xl font-bold border-b border-slate-700/50 px-2 py-3 focus:outline-none focus:border-purple-500 bg-transparent text-white placeholder-slate-600 transition-colors"
             placeholder="Note Title" required>
         </div>
         <div class="mb-6 flex-grow flex flex-col">
           <textarea id="note-content"
-            class="w-full flex-grow resize-none bg-transparent border-none focus:ring-0 text-gray-700 dark:text-gray-300 p-2 text-base leading-relaxed"
+            class="w-full flex-grow resize-none bg-transparent border-none focus:ring-0 text-slate-300 p-2 text-lg leading-relaxed placeholder-slate-600"
             placeholder="Type your note here..."></textarea>
         </div>
 
-        <div class="flex items-center justify-end space-x-3 pt-4 border-t border-gray-100 dark:border-gray-700">
+        <div class="flex items-center justify-end space-x-3 pt-4 border-t border-slate-700/50">
           <button type="button" id="cancel-note-modal-btn"
-            class="px-4 py-2 rounded-lg text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 font-medium transition">
+            class="px-5 py-2.5 rounded-xl text-slate-300 hover:bg-slate-800 font-medium transition">
             Cancel
           </button>
-          <button type="submit" class="btn-primary w-auto px-6">
+          <button type="submit"
+            class="bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-500 hover:to-pink-500 text-white px-8 py-2.5 rounded-xl font-bold shadow-lg shadow-purple-600/20 hover:shadow-purple-600/40 transition-all">
             Save Note
           </button>
         </div>
@@ -255,6 +648,9 @@
     </div>
   </div>
 
+  <!-- Scripts -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
   <script type="module" src="/src/main.js"></script>
 </body>
 

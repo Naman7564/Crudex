@@ -4,64 +4,122 @@
 
 @layer base {
   body {
-    @apply bg-brand-50 text-slate-800 antialiased dark:bg-slate-900 dark:text-gray-100 font-sans;
-    background-image: radial-gradient(#00a0e9 1px, transparent 1px);
-    background-size: 20px 20px;
-    background-position: 0 0;
-    @apply opacity-100;
+    @apply bg-slate-900 text-slate-100 antialiased font-sans;
   }
 
-  .dark body {
-    background-image: radial-gradient(#00476f 1px, transparent 1px);
+  /* Remove default tap highlight on mobile */
+  * {
+    -webkit-tap-highlight-color: transparent;
   }
 }
 
-.auth-card {
-  @apply max-w-md w-full bg-white/90 backdrop-blur-md rounded-3xl shadow-2xl p-8 border-4 border-white ring-4 ring-brand-200 dark:bg-gray-800/90 dark:border-gray-700 dark:ring-gray-900;
+@layer components {
+
+  /* Glassmorphism Utilities */
+  .glass-panel {
+    @apply bg-slate-800/40 backdrop-blur-xl border border-white/5 shadow-2xl;
+  }
+
+  .glass-header {
+    @apply bg-slate-900/80 backdrop-blur-md border-b border-white/5;
+  }
+
+  .glass-card {
+    @apply bg-slate-800/40 backdrop-blur-lg border border-white/5 rounded-2xl shadow-lg transition-all duration-300 hover:bg-slate-800/60 hover:border-white/10 hover:shadow-blue-500/5 relative overflow-hidden;
+  }
+
+  /* Navigation */
+  .nav-item {
+    @apply relative transition-all duration-200 outline-none;
+  }
+
+  .nav-item-active {
+    @apply bg-blue-600/10 text-blue-400 border border-blue-500/20 shadow-lg shadow-blue-500/5;
+  }
+
+  /* Buttons */
+  .btn-primary {
+    @apply bg-gradient-to-r from-blue-600 to-cyan-600 hover:from-blue-500 hover:to-cyan-500 text-white font-bold py-2.5 px-6 rounded-xl shadow-lg shadow-blue-600/20 hover:shadow-blue-600/40 transition-all transform hover:-translate-y-0.5 active:scale-95;
+  }
+
+  /* Inputs */
+  .input-dark {
+    @apply bg-slate-900/50 border border-slate-700 text-white placeholder-slate-500 rounded-xl focus:border-blue-500 focus:ring-1 focus:ring-blue-500 transition-all;
+  }
 }
 
-.btn-primary {
-  @apply w-full bg-brand-500 hover:bg-brand-600 text-white font-bold py-3 px-6 rounded-full transition-all duration-300 ease-out transform hover:-translate-y-1 hover:shadow-lg active:scale-95 focus:outline-none focus:ring-4 focus:ring-brand-500/30 dark:focus:ring-offset-gray-900 flex items-center justify-center gap-2;
+/* Custom Scrollbar */
+.custom-scrollbar::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
 }
 
-/* Secondary button for fun accents (Red) */
-.btn-accent {
-  @apply w-full bg-doraemon-red hover:bg-red-600 text-white font-bold py-3 px-6 rounded-full transition-all duration-300 transform hover:-translate-y-1 shadow-md hover:shadow-red-500/30;
+.custom-scrollbar::-webkit-scrollbar-track {
+  background: transparent;
 }
 
-.input-field {
-  @apply w-full px-5 py-3 rounded-2xl border-2 border-brand-100 bg-white focus:border-brand-500 focus:ring-4 focus:ring-brand-100 outline-none transition-all duration-300 dark:bg-gray-700 dark:border-gray-600 dark:text-white dark:placeholder-gray-400 dark:focus:ring-brand-500/20 text-lg;
+.custom-scrollbar::-webkit-scrollbar-thumb {
+  background: #334155;
+  border-radius: 10px;
 }
 
-.todo-item {
-  @apply flex items-center justify-between p-5 bg-white rounded-2xl border-2 border-brand-50 shadow-sm hover:shadow-xl hover:border-brand-200 transition-all duration-300 dark:bg-gray-800 dark:border-gray-700;
+.custom-scrollbar::-webkit-scrollbar-thumb:hover {
+  background: #475569;
 }
 
-/* Custom Checkbox */
-.toggle-checkbox {
-  @apply w-6 h-6 rounded-lg border-2 border-brand-300 text-brand-500 focus:ring-brand-500 focus:ring-offset-0 cursor-pointer transition-transform duration-200 ease-out active:scale-90;
+/* Animations */
+@keyframes pulse-slow {
+
+  0%,
+  100% {
+    opacity: 0.8;
+    transform: scale(1);
+  }
+
+  50% {
+    opacity: 0.5;
+    transform: scale(1.1);
+  }
 }
 
-/* Theme toggle btn */
-.theme-toggle {
-  @apply p-3 rounded-full bg-brand-100 text-brand-600 hover:bg-brand-200 dark:bg-gray-700 dark:text-yellow-400 dark:hover:bg-gray-600 transition-all duration-300 transform hover:rotate-12 hover:scale-110 shadow-inner;
+.animate-pulse-slow {
+  animation: pulse-slow 8s cubic-bezier(0.4, 0, 0.6, 1) infinite;
 }
 
-/* Bell notification style for headers/accents */
-.bell-accent {
-  @apply text-doraemon-yellow drop-shadow-md;
+/* Checkbox Customization */
+.checkbox-cyber {
+  appearance: none;
+  background-color: transparent;
+  margin: 0;
+  font: inherit;
+  color: currentColor;
+  width: 1.25em;
+  height: 1.25em;
+  border: 2px solid #475569;
+  border-radius: 0.35em;
+  display: grid;
+  place-content: center;
+  transition: all 0.2s;
+  cursor: pointer;
 }
 
-/* Navigation Tabs */
-.nav-tab {
-  @apply px-4 py-2 rounded-lg text-sm font-medium text-gray-500 hover:text-gray-700 hover:bg-white/50 dark:text-gray-400 dark:hover:text-gray-200 dark:hover:bg-gray-600/50 transition-all duration-200 outline-none focus:ring-2 focus:ring-brand-500/20;
+.checkbox-cyber::before {
+  content: "";
+  width: 0.65em;
+  height: 0.65em;
+  transform: scale(0);
+  transition: 120ms transform ease-in-out;
+  box-shadow: inset 1em 1em #3b82f6;
+  /* Blue-500 */
+  transform-origin: center;
+  clip-path: polygon(14% 44%, 0 65%, 50% 100%, 100% 16%, 80% 0%, 43% 62%);
 }
 
-.nav-tab-active {
-  @apply bg-white text-brand-600 shadow-sm dark:bg-gray-600 dark:text-white transform scale-105;
+.checkbox-cyber:checked {
+  border-color: #3b82f6;
+  background-color: rgba(59, 130, 246, 0.1);
 }
 
-/* Note Card */
-.note-card {
-  @apply bg-white dark:bg-gray-800 p-5 rounded-2xl shadow-sm border border-gray-100 dark:border-gray-700 hover:shadow-lg hover:border-brand-200 dark:hover:border-gray-600 transition-all duration-300 flex flex-col h-full;
+.checkbox-cyber:checked::before {
+  transform: scale(1);
 }
