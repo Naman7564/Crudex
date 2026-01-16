@@ -215,9 +215,11 @@ function subscribeToRealtime() {
                         const checkbox = item.querySelector('.toggle-checkbox')
                         checkbox.checked = newRecord.is_complete
                         if (newRecord.is_complete) {
-                            titleEl.classList.add('line-through', 'text-gray-400')
+                            titleEl.classList.add('line-through', 'text-gray-400', 'dark:text-gray-500')
+                            titleEl.classList.remove('text-gray-800', 'dark:text-gray-100')
                         } else {
-                            titleEl.classList.remove('line-through', 'text-gray-400')
+                            titleEl.classList.remove('line-through', 'text-gray-400', 'dark:text-gray-500')
+                            titleEl.classList.add('text-gray-800', 'dark:text-gray-100')
                         }
                     }
                 } else if (eventType === 'DELETE') {
@@ -304,9 +306,11 @@ async function toggleTodo(id, is_complete) {
         if (item) {
             const title = item.querySelector('.todo-title')
             if (is_complete) {
-                title.classList.add('line-through', 'text-gray-400')
+                title.classList.add('line-through', 'text-gray-400', 'dark:text-gray-500')
+                title.classList.remove('text-gray-800', 'dark:text-gray-100')
             } else {
-                title.classList.remove('line-through', 'text-gray-400')
+                title.classList.remove('line-through', 'text-gray-400', 'dark:text-gray-500')
+                title.classList.add('text-gray-800', 'dark:text-gray-100')
             }
         }
     }
@@ -338,7 +342,7 @@ function renderTodoItem(todo, prepend = false) {
     div.dataset.id = todo.id
 
     const isChecked = todo.is_complete ? 'checked' : ''
-    const textClass = todo.is_complete ? 'line-through text-gray-400' : 'text-gray-800'
+    const textClass = todo.is_complete ? 'line-through text-gray-400 dark:text-gray-500' : 'text-gray-800 dark:text-gray-100'
 
     div.innerHTML = `
     <div class="flex items-center space-x-4">
