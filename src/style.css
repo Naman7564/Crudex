@@ -1,0 +1,53 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  body {
+    @apply bg-brand-50 text-slate-800 antialiased dark:bg-slate-900 dark:text-gray-100 font-sans;
+    background-image: radial-gradient(#00a0e9 1px, transparent 1px);
+    background-size: 20px 20px;
+    background-position: 0 0;
+    @apply opacity-100;
+  }
+
+  .dark body {
+    background-image: radial-gradient(#00476f 1px, transparent 1px);
+  }
+}
+
+.auth-card {
+  @apply max-w-md w-full bg-white/90 backdrop-blur-md rounded-3xl shadow-2xl p-8 border-4 border-white ring-4 ring-brand-200 dark:bg-gray-800/90 dark:border-gray-700 dark:ring-gray-900;
+}
+
+.btn-primary {
+  @apply w-full bg-brand-500 hover:bg-brand-600 text-white font-bold py-3 px-6 rounded-full transition-all duration-300 ease-out transform hover:-translate-y-1 hover:shadow-lg active:scale-95 focus:outline-none focus:ring-4 focus:ring-brand-500/30 dark:focus:ring-offset-gray-900 flex items-center justify-center gap-2;
+}
+
+/* Secondary button for fun accents (Red) */
+.btn-accent {
+  @apply w-full bg-doraemon-red hover:bg-red-600 text-white font-bold py-3 px-6 rounded-full transition-all duration-300 transform hover:-translate-y-1 shadow-md hover:shadow-red-500/30;
+}
+
+.input-field {
+  @apply w-full px-5 py-3 rounded-2xl border-2 border-brand-100 bg-white focus:border-brand-500 focus:ring-4 focus:ring-brand-100 outline-none transition-all duration-300 dark:bg-gray-700 dark:border-gray-600 dark:text-white dark:placeholder-gray-400 dark:focus:ring-brand-500/20 text-lg;
+}
+
+.todo-item {
+  @apply flex items-center justify-between p-5 bg-white rounded-2xl border-2 border-brand-50 shadow-sm hover:shadow-xl hover:border-brand-200 transition-all duration-300 dark:bg-gray-800 dark:border-gray-700;
+}
+
+/* Custom Checkbox */
+.toggle-checkbox {
+  @apply w-6 h-6 rounded-lg border-2 border-brand-300 text-brand-500 focus:ring-brand-500 focus:ring-offset-0 cursor-pointer transition-transform duration-200 ease-out active:scale-90;
+}
+
+/* Theme toggle btn */
+.theme-toggle {
+  @apply p-3 rounded-full bg-brand-100 text-brand-600 hover:bg-brand-200 dark:bg-gray-700 dark:text-yellow-400 dark:hover:bg-gray-600 transition-all duration-300 transform hover:rotate-12 hover:scale-110 shadow-inner;
+}
+
+/* Bell notification style for headers/accents */
+.bell-accent {
+  @apply text-doraemon-yellow drop-shadow-md;
+}

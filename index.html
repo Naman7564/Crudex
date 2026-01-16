@@ -1,0 +1,176 @@
+<!doctype html>
+<html lang="en" class="">
+
+<head>
+  <meta charset="UTF-8" />
+  <link rel="icon" type="image/svg+xml" href="/vite.svg" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Crudex - Premium Task Manager</title>
+  <link href="./src/style.css" rel="stylesheet">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <script>
+    (function () {
+      const savedTheme = localStorage.getItem('theme');
+      const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+      if (savedTheme === 'dark' || (!savedTheme && prefersDark)) {
+        document.documentElement.classList.add('dark');
+      } else {
+        document.documentElement.classList.remove('dark');
+      }
+    })();
+  </script>
+</head>
+
+<body class="bg-gray-50 dark:bg-gray-900 h-screen overflow-hidden flex flex-col transition-colors duration-300">
+
+  <!-- Auth Container -->
+  <div id="auth-container" class="flex-grow flex items-center justify-center p-4">
+    <div class="auth-card">
+      <div class="text-center mb-8">
+        <h1 class="text-4xl font-extrabold text-brand-500 dark:text-white mb-2 drop-shadow-sm">Welcome to Crudex</h1>
+        <p class="text-slate-500 dark:text-gray-400 font-medium text-lg">Organize your gadgets & tasks!</p>
+      </div>
+
+      <form id="auth-form" class="space-y-4">
+        <div>
+          <label for="email" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Email</label>
+          <input type="email" id="email" class="input-field" placeholder="you@example.com" required>
+        </div>
+        <div>
+          <label for="password" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Password</label>
+          <input type="password" id="password" class="input-field" placeholder="••••••••" required>
+        </div>
+        <button type="submit" id="auth-submit-btn" class="btn-primary">
+          Sign In / Sign Up
+        </button>
+      </form>
+      <p id="auth-message" class="mt-4 text-center text-sm text-red-500 hidden"></p>
+      <p class="mt-4 text-center text-xs text-gray-400 dark:text-gray-500">
+        Entering a new email will automatically create an account.
+      </p>
+    </div>
+  </div>
+
+  <!-- App Container (Hidden by default) -->
+  <div id="app-container" class="hidden h-full flex flex-col">
+    <!-- Header -->
+    <header
+      class="bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700 px-6 py-4 flex items-center justify-between shadow-sm z-10 transition-colors duration-300">
+      <div class="flex items-center space-x-3">
+        <div
+          class="w-10 h-10 rounded-full bg-doraemon-yellow border-2 border-doraemon-red flex items-center justify-center text-doraemon-red shadow-lg transform hover:rotate-12 transition-transform">
+          <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" viewBox="0 0 20 20" fill="currentColor">
+            <path
+              d="M10 2a6 6 0 00-6 6v3.586l-.707.707A1 1 0 004 14h12a1 1 0 00.707-1.707L16 11.586V8a6 6 0 00-6-6zM10 18a3 3 0 01-3-3h6a3 3 0 01-3 3z" />
+          </svg>
+        </div>
+        <h1 class="text-xl font-bold text-gray-800 dark:text-white">Crudex</h1>
+      </div>
+      <div class="flex items-center space-x-4">
+        <!-- Theme Toggle Button -->
+        <button id="theme-toggle" class="theme-toggle" title="Toggle theme">
+          <!-- Sun icon (shown in dark mode) -->
+          <svg id="sun-icon" class="h-5 w-5 hidden" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
+            stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+              d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z" />
+          </svg>
+          <!-- Moon icon (shown in light mode) -->
+          <svg id="moon-icon" class="h-5 w-5" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
+            stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+              d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z" />
+          </svg>
+        </button>
+        <span id="user-email" class="text-sm text-gray-600 dark:text-gray-400 hidden md:block"></span>
+        <button id="logout-btn"
+          class="text-sm text-gray-500 dark:text-gray-400 hover:text-red-600 dark:hover:text-red-400 transition font-medium">
+          Sign Out
+        </button>
+      </div>
+    </header>
+
+    <!-- Main Content -->
+    <main class="flex-grow p-6 overflow-hidden flex justify-center">
+      <div class="w-full max-w-4xl h-full flex flex-col">
+
+        <!-- Actions Bar -->
+        <div class="flex justify-between items-center mb-6">
+          <h2 class="text-2xl font-bold text-gray-800 dark:text-white">My Tasks</h2>
+          <button id="add-todo-btn" class="btn-primary w-auto flex items-center space-x-2">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+              <path fill-rule="evenodd"
+                d="M10 3a1 1 0 011 1v5h5a1 1 0 110 2h-5v5a1 1 0 11-2 0v-5H4a1 1 0 110-2h5V4a1 1 0 011-1z"
+                clip-rule="evenodd" />
+            </svg>
+            <span>New Task</span>
+          </button>
+        </div>
+
+        <!-- Loading State -->
+        <div id="loading-state" class="flex justify-center items-center h-64 hidden">
+          <div class="animate-spin rounded-full h-12 w-12 border-b-2 border-brand-600"></div>
+        </div>
+
+        <!-- Todo List -->
+        <div id="todo-list" class="flex-grow overflow-y-auto space-y-3 pb-20 pr-2 custom-scrollbar">
+          <!-- Items will be injected here -->
+        </div>
+
+        <!-- Empty State -->
+        <div id="empty-state"
+          class="hidden flex flex-col items-center justify-center h-64 text-gray-400 dark:text-gray-500">
+          <svg xmlns="http://www.w3.org/2000/svg" class="h-16 w-16 mb-4 text-gray-300" fill="none" viewBox="0 0 24 24"
+            stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+              d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01" />
+          </svg>
+          <p class="text-lg font-medium">No tasks found</p>
+          <p class="text-sm">Create a new task to get started.</p>
+        </div>
+
+      </div>
+    </main>
+  </div>
+
+  <!-- Modal Form (Hidden by default) -->
+  <div id="todo-modal"
+    class="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 hidden flex items-center justify-center opacity-0 transition-opacity duration-300">
+    <div
+      class="bg-white dark:bg-gray-800 rounded-xl shadow-2xl w-full max-w-lg p-6 transform scale-95 transition-transform duration-300 transition-all">
+      <div class="flex justify-between items-center mb-6">
+        <h3 id="modal-title" class="text-xl font-bold text-gray-900 dark:text-white">Add New Task</h3>
+        <button id="close-modal-btn" class="text-gray-400 hover:text-gray-600 dark:hover:text-gray-200 transition">
+          <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+          </svg>
+        </button>
+      </div>
+
+      <form id="todo-form">
+        <input type="hidden" id="todo-id">
+        <div class="mb-6">
+          <label for="todo-title" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Title</label>
+          <input type="text" id="todo-title" class="input-field" placeholder="What needs to be done?" required
+            autofocus>
+        </div>
+
+        <div class="flex items-center justify-end space-x-3">
+          <button type="button" id="cancel-modal-btn"
+            class="px-4 py-2 rounded-lg text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 font-medium transition">
+            Cancel
+          </button>
+          <button type="submit" class="btn-primary w-auto px-6">
+            Save Task
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <script type="module" src="/src/main.js"></script>
+</body>
+
+</html>
