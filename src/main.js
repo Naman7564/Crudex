@@ -18,6 +18,20 @@ const themeToggleBtn = document.getElementById('theme-toggle')
 const sunIcon = document.getElementById('sun-icon')
 const moonIcon = document.getElementById('moon-icon')
 
+// Notes DOM Elements
+const tasksView = document.getElementById('tasks-view')
+const notesView = document.getElementById('notes-view')
+const tabTasks = document.getElementById('tab-tasks')
+const tabNotes = document.getElementById('tab-notes')
+const notesList = document.getElementById('notes-list')
+const notesEmptyState = document.getElementById('notes-empty-state')
+const noteModal = document.getElementById('note-modal')
+const noteForm = document.getElementById('note-form')
+const noteTitleInput = document.getElementById('note-title')
+const noteContentInput = document.getElementById('note-content')
+const noteIdInput = document.getElementById('note-id')
+const noteModalTitle = document.getElementById('note-modal-title')
+
 // Set initial icon state based on current class (set by inline script)
 if (document.documentElement.classList.contains('dark')) {
     sunIcon.classList.remove('hidden')
@@ -64,6 +78,8 @@ async function init() {
 }
 
 let realtimeChannel = null
+let notesChannel = null
+let currentTab = 'tasks'
 
 function handleSession(session) {
     if (session) {
@@ -72,16 +88,23 @@ function handleSession(session) {
         authContainer.classList.add('hidden')
         appContainer.classList.remove('hidden')
         fetchTodos()
+        fetchNotes()
         subscribeToRealtime()
+        subscribeToNotes()
     } else {
         currentUser = null
         if (realtimeChannel) {
             supabase.removeChannel(realtimeChannel)
             realtimeChannel = null
         }
+        if (notesChannel) {
+            supabase.removeChannel(notesChannel)
+            notesChannel = null
+        }
         authContainer.classList.remove('hidden')
         appContainer.classList.add('hidden')
         todoList.innerHTML = ''
+        notesList.innerHTML = ''
     }
 }
 
@@ -102,6 +125,31 @@ function setupEventListeners() {
     document.getElementById('close-modal-btn').addEventListener('click', closeModal)
     document.getElementById('cancel-modal-btn').addEventListener('click', closeModal)
     todoForm.addEventListener('submit', handleSaveTodo)
+
+    // Notes Events
+    tabTasks.addEventListener('click', () => switchTab('tasks'))
+    tabNotes.addEventListener('click', () => switchTab('notes'))
+    document.getElementById('add-note-btn').addEventListener('click', () => openNoteModal())
+    document.getElementById('close-note-modal-btn').addEventListener('click', closeNoteModal)
+    document.getElementById('cancel-note-modal-btn').addEventListener('click', closeNoteModal)
+    noteForm.addEventListener('submit', handleSaveNote)
+
+    // Notes List Delegation
+    notesList.addEventListener('click', async (e) => {
+        const item = e.target.closest('.note-card')
+        if (!item) return
+        const id = item.dataset.id
+
+        if (e.target.closest('.delete-btn')) {
+            e.stopPropagation()
+            await deleteNote(id)
+        } else {
+            // Edit on click
+            const title = item.querySelector('.note-title').textContent
+            const content = item.dataset.content // Store content in data attribute for easy retrieval
+            openNoteModal({ id, title, content })
+        }
+    })
 
     // Todo items (delegation)
     todoList.addEventListener('click', async (e) => {
@@ -413,6 +461,225 @@ function escapeHtml(text) {
         "'": '&#039;'
     };
     return text.replace(/[&<>"']/g, function (m) { return map[m]; });
+}
+
+// Start
+// --- Tabs Logic ---
+
+function switchTab(tab) {
+    currentTab = tab
+    if (tab === 'tasks') {
+        tasksView.classList.remove('hidden')
+        notesView.classList.add('hidden')
+        tabTasks.classList.add('nav-tab-active')
+        tabNotes.classList.remove('nav-tab-active')
+    } else {
+        tasksView.classList.add('hidden')
+        notesView.classList.remove('hidden')
+        tabTasks.classList.remove('nav-tab-active')
+        tabNotes.classList.add('nav-tab-active')
+    }
+}
+
+// --- Notes CRUD ---
+
+async function fetchNotes() {
+    notesList.innerHTML = ''
+    notesEmptyState.classList.add('hidden')
+
+    const { data, error } = await supabase
+        .from('notes')
+        .select('*')
+        .order('created_at', { ascending: false })
+
+    if (error) {
+        console.error('Error fetching notes:', error)
+        return
+    }
+
+    if (data.length === 0) {
+        notesEmptyState.classList.remove('hidden')
+    } else {
+        data.forEach(renderNoteItem)
+    }
+}
+
+function subscribeToNotes() {
+    if (notesChannel) {
+        supabase.removeChannel(notesChannel)
+    }
+
+    notesChannel = supabase
+        .channel('notes-channel')
+        .on(
+            'postgres_changes',
+            { event: '*', schema: 'public', table: 'notes' },
+            (payload) => {
+                const { eventType, new: newRecord, old: oldRecord } = payload
+
+                if (eventType === 'INSERT') {
+                    if (newRecord.user_id === currentUser.id) {
+                        const exists = document.querySelector(`.note-card[data-id="${newRecord.id}"]`)
+                        if (!exists) {
+                            if (notesList.children.length === 0) notesEmptyState.classList.add('hidden')
+                            renderNoteItem(newRecord, true)
+                        }
+                    }
+                } else if (eventType === 'UPDATE') {
+                    const item = document.querySelector(`.note-card[data-id="${newRecord.id}"]`)
+                    if (item) {
+                        item.querySelector('.note-title').textContent = newRecord.title
+                        item.querySelector('.note-content').textContent = newRecord.content
+                        item.dataset.content = newRecord.content
+                    }
+                } else if (eventType === 'DELETE') {
+                    const item = document.querySelector(`.note-card[data-id="${oldRecord.id}"]`)
+                    if (item) item.remove()
+                    if (notesList.children.length === 0) notesEmptyState.classList.remove('hidden')
+                }
+            }
+        )
+        .subscribe()
+}
+
+async function handleSaveNote(e) {
+    e.preventDefault()
+
+    const submitBtn = noteForm.querySelector('button[type="submit"]')
+    if (submitBtn.disabled) return
+
+    submitBtn.disabled = true
+    const originalText = submitBtn.textContent
+    submitBtn.textContent = 'Saving...'
+
+    const title = noteTitleInput.value
+    const content = noteContentInput.value
+    const id = noteIdInput.value
+
+    try {
+        if (id) {
+            await updateNote(id, title, content)
+        } else {
+            await createNote(title, content)
+        }
+        closeNoteModal()
+    } catch (err) {
+        console.error('Error saving note:', err)
+    } finally {
+        submitBtn.disabled = false
+        submitBtn.textContent = originalText
+    }
+}
+
+async function createNote(title, content) {
+    const { data, error } = await supabase
+        .from('notes')
+        .insert([{ title, content, user_id: currentUser.id }])
+        .select()
+
+    if (error) {
+        console.error('Error creating note:', error)
+        alert('Error creating note')
+    } else {
+        if (notesList.children.length === 0) notesEmptyState.classList.add('hidden')
+        renderNoteItem(data[0], true)
+    }
+}
+
+async function updateNote(id, title, content) {
+    const { error } = await supabase
+        .from('notes')
+        .update({ title, content })
+        .eq('id', id)
+
+    if (error) {
+        console.error('Error updating note:', error)
+        alert('Failed to update note')
+    } else {
+        // Optimistic update handled by realtime is mostly sufficient, 
+        // but local update is good for responsiveness if realtime is slow.
+        // We'll rely on realtime or fetch. Fetch is safest.
+        fetchNotes()
+    }
+}
+
+async function deleteNote(id) {
+    if (!confirm('Delete this note?')) return
+
+    const { error } = await supabase
+        .from('notes')
+        .delete()
+        .eq('id', id)
+
+    if (error) {
+        console.error('Error deleting note:', error)
+        alert('Failed to delete note')
+    } else {
+        const item = document.querySelector(`.note-card[data-id="${id}"]`)
+        if (item) item.remove()
+        if (notesList.children.length === 0) notesEmptyState.classList.remove('hidden')
+    }
+}
+
+function renderNoteItem(note, prepend = false) {
+    const div = document.createElement('div')
+    div.className = 'note-card group cursor-pointer'
+    div.dataset.id = note.id
+    div.dataset.content = note.content || ''
+
+    div.innerHTML = `
+        <div class="flex justify-between items-start mb-2">
+            <h3 class="note-title text-lg font-bold text-gray-800 dark:text-white line-clamp-1">${escapeHtml(note.title)}</h3>
+            <button class="delete-btn opacity-0 group-hover:opacity-100 p-1 text-gray-400 hover:text-red-600 transition" title="Delete">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                </svg>
+            </button>
+        </div>
+        <div class="note-content text-gray-600 dark:text-gray-300 text-sm whitespace-pre-wrap line-clamp-4 leading-relaxed">${escapeHtml(note.content || '')}</div>
+        <div class="mt-auto pt-4 text-xs text-gray-400 dark:text-gray-500 font-medium">
+            ${new Date(note.created_at).toLocaleDateString()}
+        </div>
+    `
+
+    if (prepend) {
+        notesList.prepend(div)
+    } else {
+        notesList.appendChild(div)
+    }
+}
+
+function openNoteModal(note = null) {
+    if (note) {
+        noteModalTitle.textContent = 'Edit Note'
+        noteTitleInput.value = note.title
+        noteContentInput.value = note.content
+        noteIdInput.value = note.id
+    } else {
+        noteModalTitle.textContent = 'Add New Note'
+        noteTitleInput.value = ''
+        noteContentInput.value = ''
+        noteIdInput.value = ''
+    }
+
+    noteModal.classList.remove('hidden')
+    setTimeout(() => {
+        noteModal.classList.remove('opacity-0')
+        noteModal.querySelector('div').classList.remove('scale-95')
+        noteModal.querySelector('div').classList.add('scale-100')
+    }, 10)
+
+    noteTitleInput.focus()
+}
+
+function closeNoteModal() {
+    noteModal.classList.add('opacity-0')
+    noteModal.querySelector('div').classList.remove('scale-100')
+    noteModal.querySelector('div').classList.add('scale-95')
+
+    setTimeout(() => {
+        noteModal.classList.add('hidden')
+    }, 300)
 }
 
 // Start

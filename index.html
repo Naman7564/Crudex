@@ -30,7 +30,7 @@
     <div class="auth-card">
       <div class="text-center mb-8">
         <h1 class="text-4xl font-extrabold text-brand-500 dark:text-white mb-2 drop-shadow-sm">Welcome to Crudex</h1>
-        <p class="text-slate-500 dark:text-gray-400 font-medium text-lg">Organize your gadgets & tasks!</p>
+        <p class="text-slate-500 dark:text-gray-400 font-medium text-lg">Organize your Notes & tasks!</p>
       </div>
 
       <form id="auth-form" class="space-y-4">
@@ -96,39 +96,84 @@
     <main class="flex-grow p-6 overflow-hidden flex justify-center">
       <div class="w-full max-w-4xl h-full flex flex-col">
 
-        <!-- Actions Bar -->
-        <div class="flex justify-between items-center mb-6">
-          <h2 class="text-2xl font-bold text-gray-800 dark:text-white">My Tasks</h2>
-          <button id="add-todo-btn" class="btn-primary w-auto flex items-center space-x-2">
-            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
-              <path fill-rule="evenodd"
-                d="M10 3a1 1 0 011 1v5h5a1 1 0 110 2h-5v5a1 1 0 11-2 0v-5H4a1 1 0 110-2h5V4a1 1 0 011-1z"
-                clip-rule="evenodd" />
+        <!-- Tabs -->
+        <div class="flex space-x-1 bg-gray-100 p-1 rounded-xl mb-6 dark:bg-gray-700 w-fit self-center shadow-inner">
+          <button id="tab-tasks" class="nav-tab nav-tab-active">Tasks</button>
+          <button id="tab-notes" class="nav-tab">Notes</button>
+        </div>
+
+        <!-- Tasks View -->
+        <div id="tasks-view" class="flex-col flex-grow overflow-hidden flex">
+
+          <!-- Actions Bar -->
+          <div class="flex justify-between items-center mb-6">
+            <h2 class="text-2xl font-bold text-gray-800 dark:text-white">My Tasks</h2>
+            <button id="add-todo-btn" class="btn-primary w-auto flex items-center space-x-2">
+              <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+                <path fill-rule="evenodd"
+                  d="M10 3a1 1 0 011 1v5h5a1 1 0 110 2h-5v5a1 1 0 11-2 0v-5H4a1 1 0 110-2h5V4a1 1 0 011-1z"
+                  clip-rule="evenodd" />
+              </svg>
+              <span>New Task</span>
+            </button>
+          </div>
+
+          <!-- Loading State -->
+          <div id="loading-state" class="flex justify-center items-center h-64 hidden">
+            <div class="animate-spin rounded-full h-12 w-12 border-b-2 border-brand-600"></div>
+          </div>
+
+          <!-- Todo List -->
+          <div id="todo-list" class="flex-grow overflow-y-auto space-y-3 pb-20 pr-2 custom-scrollbar">
+            <!-- Items will be injected here -->
+          </div>
+
+          <!-- Empty State -->
+          <div id="empty-state"
+            class="hidden flex flex-col items-center justify-center h-64 text-gray-400 dark:text-gray-500">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-16 w-16 mb-4 text-gray-300" fill="none" viewBox="0 0 24 24"
+              stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01" />
             </svg>
-            <span>New Task</span>
-          </button>
-        </div>
+            <p class="text-lg font-medium">No tasks found</p>
+            <p class="text-sm">Create a new task to get started.</p>
+          </div>
 
-        <!-- Loading State -->
-        <div id="loading-state" class="flex justify-center items-center h-64 hidden">
-          <div class="animate-spin rounded-full h-12 w-12 border-b-2 border-brand-600"></div>
-        </div>
+        </div> <!-- End Tasks View -->
 
-        <!-- Todo List -->
-        <div id="todo-list" class="flex-grow overflow-y-auto space-y-3 pb-20 pr-2 custom-scrollbar">
-          <!-- Items will be injected here -->
-        </div>
+        <!-- Notes View -->
+        <div id="notes-view" class="hidden flex-col flex-grow overflow-hidden flex">
+          <!-- Actions Bar -->
+          <div class="flex justify-between items-center mb-6">
+            <h2 class="text-2xl font-bold text-gray-800 dark:text-white">My Notes</h2>
+            <button id="add-note-btn" class="btn-primary w-auto flex items-center space-x-2">
+              <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+                <path fill-rule="evenodd"
+                  d="M10 3a1 1 0 011 1v5h5a1 1 0 110 2h-5v5a1 1 0 11-2 0v-5H4a1 1 0 110-2h5V4a1 1 0 011-1z"
+                  clip-rule="evenodd" />
+              </svg>
+              <span>New Note</span>
+            </button>
+          </div>
 
-        <!-- Empty State -->
-        <div id="empty-state"
-          class="hidden flex flex-col items-center justify-center h-64 text-gray-400 dark:text-gray-500">
-          <svg xmlns="http://www.w3.org/2000/svg" class="h-16 w-16 mb-4 text-gray-300" fill="none" viewBox="0 0 24 24"
-            stroke="currentColor">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-              d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01" />
-          </svg>
-          <p class="text-lg font-medium">No tasks found</p>
-          <p class="text-sm">Create a new task to get started.</p>
+          <!-- Notes List -->
+          <div id="notes-list"
+            class="flex-grow overflow-y-auto pb-20 pr-2 custom-scrollbar grid grid-cols-1 md:grid-cols-2 gap-4 auto-rows-min content-start">
+            <!-- Notes will be injected here -->
+          </div>
+
+          <!-- Notes Empty State -->
+          <div id="notes-empty-state"
+            class="hidden flex flex-col items-center justify-center h-64 text-gray-400 dark:text-gray-500">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-16 w-16 mb-4 text-gray-300" fill="none" viewBox="0 0 24 24"
+              stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+            </svg>
+            <p class="text-lg font-medium">No notes yet</p>
+            <p class="text-sm">Capture your thoughts!</p>
+          </div>
         </div>
 
       </div>
@@ -164,6 +209,46 @@
           </button>
           <button type="submit" class="btn-primary w-auto px-6">
             Save Task
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Note Modal -->
+  <div id="note-modal"
+    class="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 hidden flex items-center justify-center opacity-0 transition-opacity duration-300">
+    <div
+      class="bg-white dark:bg-gray-800 rounded-xl shadow-2xl w-full max-w-2xl p-6 transform scale-95 transition-transform duration-300 transition-all flex flex-col h-3/4">
+      <div class="flex justify-between items-center mb-6">
+        <h3 id="note-modal-title" class="text-xl font-bold text-gray-900 dark:text-white">Add New Note</h3>
+        <button id="close-note-modal-btn" class="text-gray-400 hover:text-gray-600 dark:hover:text-gray-200 transition">
+          <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+          </svg>
+        </button>
+      </div>
+
+      <form id="note-form" class="flex flex-col flex-grow overflow-hidden">
+        <input type="hidden" id="note-id">
+        <div class="mb-4">
+          <input type="text" id="note-title"
+            class="w-full text-xl font-bold border-b border-gray-200 dark:border-gray-700 px-2 py-2 focus:outline-none focus:border-brand-500 bg-transparent text-gray-800 dark:text-white placeholder-gray-400 dark:placeholder-gray-600 transition-colors"
+            placeholder="Note Title" required>
+        </div>
+        <div class="mb-6 flex-grow flex flex-col">
+          <textarea id="note-content"
+            class="w-full flex-grow resize-none bg-transparent border-none focus:ring-0 text-gray-700 dark:text-gray-300 p-2 text-base leading-relaxed"
+            placeholder="Type your note here..."></textarea>
+        </div>
+
+        <div class="flex items-center justify-end space-x-3 pt-4 border-t border-gray-100 dark:border-gray-700">
+          <button type="button" id="cancel-note-modal-btn"
+            class="px-4 py-2 rounded-lg text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 font-medium transition">
+            Cancel
+          </button>
+          <button type="submit" class="btn-primary w-auto px-6">
+            Save Note
           </button>
         </div>
       </form>
