@@ -53,12 +53,17 @@ async function init() {
     const { data: { session } } = await supabase.auth.getSession()
     handleSession(session)
 
-    supabase.auth.onAuthStateChange((_event, session) => {
+    // Listen for auth changes, but skip the INITIAL_SESSION event 
+    // since we already handled it above with getSession()
+    supabase.auth.onAuthStateChange((event, session) => {
+        if (event === 'INITIAL_SESSION') return
         handleSession(session)
     })
 
     setupEventListeners()
 }
+
+let realtimeChannel = null
 
 function handleSession(session) {
     if (session) {
@@ -70,6 +75,10 @@ function handleSession(session) {
         subscribeToRealtime()
     } else {
         currentUser = null
+        if (realtimeChannel) {
+            supabase.removeChannel(realtimeChannel)
+            realtimeChannel = null
+        }
         authContainer.classList.remove('hidden')
         appContainer.classList.add('hidden')
         todoList.innerHTML = ''
@@ -174,17 +183,20 @@ async function fetchTodos() {
 }
 
 function subscribeToRealtime() {
-    supabase
+    if (realtimeChannel) {
+        supabase.removeChannel(realtimeChannel)
+    }
+
+    realtimeChannel = supabase
         .channel('todos-channel')
         .on(
             'postgres_changes',
             { event: '*', schema: 'public', table: 'todos' },
             (payload) => {
-                console.log('Realtime change:', payload)
                 const { eventType, new: newRecord, old: oldRecord } = payload
 
                 if (eventType === 'INSERT') {
-                    // Only add if it belongs to current user (RLS helps, but client filter is good too)
+                    // Only add if it belongs to current user
                     if (newRecord.user_id === currentUser.id) {
                         // Check if already exists (optimistic update might have added it)
                         const exists = document.querySelector(`.todo-item[data-id="${newRecord.id}"]`)
@@ -220,15 +232,31 @@ function subscribeToRealtime() {
 
 async function handleSaveTodo(e) {
     e.preventDefault()
+
+    // Prevent double submission
+    const submitBtn = todoForm.querySelector('button[type="submit"]')
+    if (submitBtn.disabled) return
+
+    submitBtn.disabled = true
+    const originalText = submitBtn.textContent
+    submitBtn.textContent = 'Saving...'
+
     const title = todoTitleInput.value
     const id = todoIdInput.value
 
-    if (id) {
-        await updateTodo(id, title)
-    } else {
-        await createTodo(title)
+    try {
+        if (id) {
+            await updateTodo(id, title)
+        } else {
+            await createTodo(title)
+        }
+        closeModal()
+    } catch (err) {
+        console.error('Error saving:', err)
+    } finally {
+        submitBtn.disabled = false
+        submitBtn.textContent = originalText
     }
-    closeModal()
 }
 
 async function createTodo(title) {
