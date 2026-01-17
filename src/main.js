@@ -32,8 +32,8 @@ const teamsView = document.getElementById('teams-view')
 const dashboardView = document.getElementById('dashboard-view')
 
 // Dashboard DOM
-const dashboardNotesList = document.getElementById('dashboard-notes-list')
-const dashboardAddNoteBtn = document.getElementById('dashboard-add-note-btn')
+const dashboardTasksList = document.getElementById('dashboard-tasks-list')
+const dashboardAddTaskBtn = document.getElementById('dashboard-add-task-btn')
 const statsPercentage = document.getElementById('stats-percentage')
 const statsProgressCircle = document.getElementById('stats-progress-circle')
 const statsCompletedCount = document.getElementById('stats-completed-count')
@@ -44,6 +44,12 @@ const calendarMonth = document.getElementById('calendar-month')
 const prevMonthBtn = document.getElementById('prev-month')
 const nextMonthBtn = document.getElementById('next-month')
 const analysisChartCanvas = document.getElementById('analysis-chart')
+
+// Quick Actions DOM
+const actionScheduleMeeting = document.getElementById('action-schedule-meeting')
+const actionViewUpcoming = document.getElementById('action-view-upcoming')
+const actionArchiveCompleted = document.getElementById('action-archive-completed')
+const actionAddNote = document.getElementById('action-add-note')
 
 let chartInstance = null
 let currentCalendarDate = new Date()
@@ -114,7 +120,7 @@ function handleSession(session) {
         appContainer.classList.add('hidden')
         todoList.innerHTML = ''
         notesList.innerHTML = ''
-        if (dashboardNotesList) dashboardNotesList.innerHTML = ''
+        if (dashboardTasksList) dashboardTasksList.innerHTML = ''
     }
 }
 
@@ -134,7 +140,35 @@ function setupEventListeners() {
     if (navSettings) navSettings.addEventListener('click', () => alert('Settings coming soon!'))
 
     // Dashboard actions
-    if (dashboardAddNoteBtn) dashboardAddNoteBtn.addEventListener('click', () => openNoteModal())
+    if (dashboardAddTaskBtn) dashboardAddTaskBtn.addEventListener('click', () => openTodoModal())
+    // Quick Actions
+    if (actionScheduleMeeting) actionScheduleMeeting.addEventListener('click', () => {
+        openTodoModal({ category: 'Meeting' })
+    })
+    if (actionViewUpcoming) actionViewUpcoming.addEventListener('click', () => {
+        switchView('tasks')
+    })
+    if (actionArchiveCompleted) actionArchiveCompleted.addEventListener('click', async () => {
+        if (!confirm('Archive (Delete) all completed tasks?')) return
+        // Fetch completed
+        const { data: completed } = await supabase.from('todos').select('id').eq('is_complete', true)
+        if (completed && completed.length > 0) {
+            const ids = completed.map(t => t.id)
+            const { error } = await supabase.from('todos').delete().in('id', ids)
+            if (!error) {
+                alert('Archived completed tasks.')
+                fetchTodos()
+                loadDashboardData()
+            } else {
+                alert('Error archiving tasks')
+            }
+        } else {
+            alert('No completed tasks to archive.')
+        }
+    })
+    if (actionAddNote) actionAddNote.addEventListener('click', () => {
+        openNoteModal()
+    })
 
     // Notification
     notificationBtn.addEventListener('click', (e) => {
@@ -284,25 +318,42 @@ async function loadDashboardData() {
         if (statsProgressCircle) statsProgressCircle.style.strokeDashoffset = offset
     }
 
-    // 2. Quick Notes (Top 3)
-    const { data: notes } = await supabase.from('notes').select('*').order('created_at', { ascending: false }).limit(3)
+    // 2. Upcoming Tasks (Top 3 Incomplete)
+    // We already have 'todos' from step 1
 
-    if (dashboardNotesList && notes) {
-        dashboardNotesList.innerHTML = ''
-        if (notes.length === 0) {
-            dashboardNotesList.innerHTML = '<p class="text-slate-500 text-sm">No notes yet.</p>'
+    if (dashboardTasksList && todos) {
+        dashboardTasksList.innerHTML = ''
+        // Filter incomplete, and maybe sort by due_date if available, or just created_at
+        // Current 'todos' is already sorted by created_at desc
+        // Let's filter incomplete
+        const upcoming = todos.filter(t => !t.is_complete).slice(0, 3)
+
+        if (upcoming.length === 0) {
+            dashboardTasksList.innerHTML = '<p class="text-slate-500 text-sm">No upcoming tasks.</p>'
         } else {
-            notes.forEach(note => {
+            upcoming.forEach(task => {
                 const div = document.createElement('div')
                 div.className = 'p-3 rounded-xl bg-slate-800/50 hover:bg-slate-800 border border-slate-700/50 cursor-pointer transition-colors group'
+
+                // Format Due Date
+                let dateDisplay = ''
+                if (task.due_date) {
+                    const dateObj = new Date(task.due_date)
+                    const isToday = new Date().toDateString() === dateObj.toDateString()
+                    dateDisplay = isToday ? 'Due Today' : dateObj.toLocaleDateString()
+                }
+
                 div.innerHTML = `
                     <div class="flex justify-between items-start">
-                        <h4 class="font-medium text-white line-clamp-1 text-sm">${escapeHtml(note.title)}</h4>
+                        <h4 class="font-medium text-white line-clamp-1 text-sm">${escapeHtml(task.title)}</h4>
                     </div>
-                    <p class="text-slate-400 text-xs mt-1 line-clamp-1">${escapeHtml(note.content || '')}</p>
+                    <div class="flex justify-between items-center mt-1">
+                        <span class="text-xs text-blue-400">${dateDisplay}</span>
+                        <span class="text-xs text-slate-500">${escapeHtml(task.category || 'General')}</span>
+                    </div>
                 `
-                div.addEventListener('click', () => openNoteModal(note))
-                dashboardNotesList.appendChild(div)
+                div.addEventListener('click', () => openTodoModal(task))
+                dashboardTasksList.appendChild(div)
             })
         }
     }
